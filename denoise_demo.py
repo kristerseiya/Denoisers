@@ -5,15 +5,15 @@ from PIL import Image
 import argparse
 
 import utils
-import dnsr
-from DnCNN import load_dncnn, load_cdncnn
+from dnsr import dnsr
+from dnsr.DnCNN import load_dncnn, load_cdncnn
 import torch
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--image', type=str, required=True)
 parser.add_argument('--noiselvl', type=float, default=25)
 parser.add_argument('--denoiser', type=str, default='dncnn')
-parser.add_argument('--weights', type=str, default='DnCNN/dncnn50.pth')
+parser.add_argument('--weights', type=str, default='dsnr/DnCNN/dncnn50.pth')
 args = parser.parse_args()
 
 img = Image.open(args.image).convert('L')
