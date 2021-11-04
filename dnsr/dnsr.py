@@ -6,11 +6,9 @@ import torch.nn.functional as F
 from scipy.signal import correlate2d
 from scipy.signal import fftconvolve
 
-try:
-    from prox_tv import tv1_2d as prx_tv
-    import pybm3d
-except:
-    pass
+# try:
+#     from prox_tv import tv1_2d as prx_tv
+import pybm3d
 
 from .DnCNN import load_dncnn, load_cdncnn
 
@@ -22,7 +20,10 @@ class ProxTV:
         return prx_tv(x, self.lambd)
 
 class BM3D:
-    def __init__(self, sigma):
+    def __init__(self):
+        pass
+
+    def set_param(self, sigma):
         self.sigma = sigma
 
     def __call__(self, x):
@@ -79,7 +80,7 @@ class cDnCNN:
                 x = x.view(batch_size, 1, self.patch_size, self.patch_size)
             else:
                 x = x.view(1, 1, *x.size())
-            c = torch.ones_like(x) * c / 255.
+            c = torch.ones_like(x) * self.c
             y = self.net(x, c)
             y = y.cpu().squeeze(0).squeeze(0)
             y = y.numpy()

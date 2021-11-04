@@ -6,7 +6,6 @@ import argparse
 
 import utils
 from dnsr import dnsr
-from dnsr.DnCNN import load_dncnn, load_cdncnn
 import torch
 
 parser = argparse.ArgumentParser()
@@ -22,21 +21,28 @@ noisy = img + np.random.normal(size=img.shape) * args.noiselvl / 255.
 
 if args.denoiser == 'dncnn':
     net = load_dncnn(args.weights)
-    x = torch.tensor(noisy, dtype=torch.float32, device=net.device)
-    x = x.view(1, 1, *x.size())
-    y = net(x)
-    y = y.view(y.size(-2), y.size(-1))
-    recon = y.cpu().numpy()
+    # x = torch.tensor(noisy, dtype=torch.float32, device=net.device)
+    # x = x.view(1, 1, *x.size())
+    # y = net(x)
+    # y = y.view(y.size(-2), y.size(-1))
+    # recon = y.cpu().numpy()
+
+    net = dnsr.DnCNN(args.weights)
+    recon = net(noisy)
 elif args.denoiser == 'cdncnn':
-    net = load_cdncnn(args.weights)
-    x = torch.tensor(noisy, dtype=torch.float32, device=net.device)
-    x = x.view(1, 1, *x.size())
-    c = torch.ones_like(x) * args.noiselvl / 255.
-    y = net(x, c)
-    y = y.view(y.size(-2), y.size(-1))
-    recon = y.cpu().numpy()
+    net = dnsr.cDnCNN(args.weights)
+    net.set_param(args.noiselvl/255.)
+    recon = net(noisy)
+    # net = load_cdncnn(args.weights)
+    # x = torch.tensor(noisy, dtype=torch.float32, device=net.device)
+    # x = x.view(1, 1, *x.size())
+    # c = torch.ones_like(x) * args.noiselvl / 255.
+    # y = net(x, c)
+    # y = y.view(y.size(-2), y.size(-1))
+    # recon = y.cpu().numpy()
 elif args.denoiser == 'bm3d':
-    bm3d= dnsr.BM3D(lambd=(args.noiselvl/255.)**2)
+    bm3d= dnsr.BM3D()
+    bm3d.set_param(args.noiselvl/255.)
     recon = bm3d(noisy)
 elif args.denoiser == 'tv':
     tvprox = dnsr.ProxTV(lambd=(args.noiselvl/255.*7)**2)
