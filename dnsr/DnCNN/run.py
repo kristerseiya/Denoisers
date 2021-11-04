@@ -33,14 +33,17 @@ def train_single_epoch(net, optimizer, train_loader,
         batch_size = images.size(0)
         images = images.to(net.device)
         if type(noise_lvl) == list:
-            sigma = torch.rand(batch_size, 1, 1, 1, device=net.device)
+            # sigma = torch.rand(batch_size, 1, 1, 1, device=net.device)
+            sigma = torch.rand_like(images)
             sigma = sigma * (noise_lvl[1] - noise_lvl[0]) + noise_lvl[0]
+            # sigma = torch.sqrt((noise_lvl[1] - noise_lvl[0])**2 * sigma) + noise_lvl[0]
         noise = torch.randn_like(images) * sigma / 255.
         noisy = images + noise
         if clip:
             noisy = torch.clip(noisy, 0, 1)
         if isinstance(net, model.cDnCNN):
-            condition = (sigma / 255.).expand_as(noisy)
+            # condition = (sigma / 255.).expand_as(noisy)
+            condition = sigma / 255.
             output = net(noisy, condition)
         else:
             output = net(noisy)
@@ -77,14 +80,17 @@ def validate(net, test_loader, noise_lvl, clip=False, lossfn='L2'):
         batch_size = images.size(0)
         images = images.to(net.device)
         if type(noise_lvl) == list:
-            sigma = torch.rand(batch_size, 1, 1, 1, device=net.device)
+            # sigma = torch.rand(batch_size, 1, 1, 1, device=net.device)
+            sigma = torch.rand_like(images)
             sigma = sigma * (noise_lvl[1] - noise_lvl[0]) + noise_lvl[0]
+            # sigma = torch.sqrt((noise_lvl[1] - noise_lvl[0])**2 * sigma) + noise_lvl[0]
         noise = torch.randn_like(images) * sigma / 255.
         noisy = images + noise
         if clip:
             noisy = torch.clip(noisy, 0, 1)
         if isinstance(net, model.cDnCNN):
-            condition = (sigma / 255.).expand_as(noisy)
+            # condition = (sigma / 255.).expand_as(noisy)
+            condition = sigma / 255.
             output = net(noisy, condition)
         else:
             output = net(noisy)
