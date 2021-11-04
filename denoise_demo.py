@@ -5,7 +5,7 @@ from PIL import Image
 import argparse
 
 import utils
-from dnsr import dnsr
+import dnsr
 import torch
 
 parser = argparse.ArgumentParser()
@@ -20,26 +20,12 @@ img = np.array(img) / 255.
 noisy = img + np.random.normal(size=img.shape) * args.noiselvl / 255.
 
 if args.denoiser == 'dncnn':
-    net = load_dncnn(args.weights)
-    # x = torch.tensor(noisy, dtype=torch.float32, device=net.device)
-    # x = x.view(1, 1, *x.size())
-    # y = net(x)
-    # y = y.view(y.size(-2), y.size(-1))
-    # recon = y.cpu().numpy()
-
     net = dnsr.DnCNN(args.weights)
     recon = net(noisy)
 elif args.denoiser == 'cdncnn':
     net = dnsr.cDnCNN(args.weights)
     net.set_param(args.noiselvl/255.)
     recon = net(noisy)
-    # net = load_cdncnn(args.weights)
-    # x = torch.tensor(noisy, dtype=torch.float32, device=net.device)
-    # x = x.view(1, 1, *x.size())
-    # c = torch.ones_like(x) * args.noiselvl / 255.
-    # y = net(x, c)
-    # y = y.view(y.size(-2), y.size(-1))
-    # recon = y.cpu().numpy()
 elif args.denoiser == 'bm3d':
     bm3d= dnsr.BM3D()
     bm3d.set_param(args.noiselvl/255.)
