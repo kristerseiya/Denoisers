@@ -88,7 +88,6 @@ def validate(net, test_loader, noise_lvl, clip=False, lossfn='L2'):
             output = net(noisy, condition)
         else:
             output = net(noisy)
-        output = net(input)
         total_loss += lossfn(output, images).item() * batch_size
         n_data += batch_size
         pbar.update(1)
