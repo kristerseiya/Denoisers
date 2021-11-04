@@ -11,6 +11,15 @@ import sys
 from . import data
 from . import model
 
+def get_gauss2d(h, w, sigma):
+    gauss_1d_w = np.array([np.exp(-(x-w//2)**2/float(2**sigma**2)) for x in range(w)])
+    gauss_1d_w = gauss_1d_w / gauss_1d_w.sum()
+    gauss_1d_h = np.array([np.exp(-(x-h//2)**2/float(2**sigma**2)) for x in range(h)])
+    gauss_1d_h = gauss_1d_h
+    gauss_2d = np.array([gauss_1d_w * s for s in gauss_1d_h])
+    gauss_2d = gauss_2d / gauss_2d.sum()
+    return gauss_2d
+
 def train_single_epoch(net, optimizer, train_loader,
                        noise_lvl, clip=False, lossfn='L2',
                        scheduler=None):
@@ -28,6 +37,10 @@ def train_single_epoch(net, optimizer, train_loader,
 
     pbar = tqdm(total=len(train_loader), position=0, leave=False, file=sys.stdout)
 
+    filter = get_gauss2d(5, 5, 1)
+    filter = torch.from_numpy(filter)
+    filter = filter.unsqueeze(0)
+
     for images in train_loader:
         optimizer.zero_grad()
         batch_size = images.size(0)
@@ -36,6 +49,7 @@ def train_single_epoch(net, optimizer, train_loader,
             # sigma = torch.rand(batch_size, 1, 1, 1, device=net.device)
             sigma = torch.rand_like(images)
             sigma = sigma * (noise_lvl[1] - noise_lvl[0]) + noise_lvl[0]
+            sigma = F.conv2d(sigma, filter, padding='same')
             # sigma = torch.sqrt((noise_lvl[1] - noise_lvl[0])**2 * sigma) + noise_lvl[0]
         noise = torch.randn_like(images) * sigma / 255.
         noisy = images + noise
@@ -76,6 +90,10 @@ def validate(net, test_loader, noise_lvl, clip=False, lossfn='L2'):
 
     pbar = tqdm(total=len(test_loader), position=0, leave=False, file=sys.stdout)
 
+    filter = get_gauss2d(5, 5, 1)
+    filter = torch.from_numpy(filter)
+    filter = filter.unsqueeze(0)
+    
     for images in test_loader:
         batch_size = images.size(0)
         images = images.to(net.device)
@@ -83,6 +101,7 @@ def validate(net, test_loader, noise_lvl, clip=False, lossfn='L2'):
             # sigma = torch.rand(batch_size, 1, 1, 1, device=net.device)
             sigma = torch.rand_like(images)
             sigma = sigma * (noise_lvl[1] - noise_lvl[0]) + noise_lvl[0]
+            sigma = F.conv2d(sigma, filter, padding='same')
             # sigma = torch.sqrt((noise_lvl[1] - noise_lvl[0])**2 * sigma) + noise_lvl[0]
         noise = torch.randn_like(images) * sigma / 255.
         noisy = images + noise
