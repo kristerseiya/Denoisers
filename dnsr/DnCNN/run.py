@@ -37,7 +37,7 @@ def train_single_epoch(net, optimizer, train_loader,
 
     pbar = tqdm(total=len(train_loader), position=0, leave=False, file=sys.stdout)
 
-    filter = get_gauss2d(5, 5, 1)
+    filter = get_gauss2d(5, 5, 2)
     filter = torch.from_numpy(filter)
     filter = filter.unsqueeze(0)
 
@@ -93,7 +93,7 @@ def validate(net, test_loader, noise_lvl, clip=False, lossfn='L2'):
     filter = get_gauss2d(5, 5, 1)
     filter = torch.from_numpy(filter)
     filter = filter.unsqueeze(0)
-    
+
     for images in test_loader:
         batch_size = images.size(0)
         images = images.to(net.device)
