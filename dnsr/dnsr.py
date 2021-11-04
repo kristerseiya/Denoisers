@@ -85,4 +85,4 @@ class cDnCNN:
             y = y.cpu().squeeze(0).squeeze(0)
             y = y.numpy()
             return y
-        return self.net(x)
+        return self.net(x, torch.ones_like(x) * self.c)
