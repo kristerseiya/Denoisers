@@ -28,7 +28,7 @@ def train_single_epoch(net, optimizer, train_loader,
         batch_size = images.size(0)
         images = images.to(net.device)
         x = inputfn(images)
-        output = net(x)
+        output = net(*x)
         loss = lossfn(output, images)
         loss.backward()
         optimizer.step()
@@ -56,7 +56,7 @@ def validate(net, test_loader, inputfn=data.inputfn(25), lossfn=F.mse_loss):
         batch_size = images.size(0)
         images = images.to(net.device)
         x = inputfn(images)
-        output = net(x)
+        output = net(*x)
         total_loss += lossfn(output, images).item() * batch_size
         n_data += batch_size
         pbar.update(1)

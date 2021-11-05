@@ -208,6 +208,5 @@ class inputfn:
             noisy = torch.clip(noisy, 0, 1)
         if self.map:
             map = sigma.expand_as(noisy) / 255.
-            noisy = torch.concatenate([noisy, map], axis=1)
+            return noisy, map
         return noisy
-    return inputfn
