@@ -174,3 +174,40 @@ class ImageDataset(Dataset):
         subsets.append(ImageDataSubset(self, indices[start:]))
 
         return subsets
+
+
+# def get_gauss2d(h, w, sigma):
+#     gauss_1d_w = np.array([np.exp(-(x-w//2)**2/float(2**sigma**2)) for x in range(w)])
+#     gauss_1d_w = gauss_1d_w / gauss_1d_w.sum()
+#     gauss_1d_h = np.array([np.exp(-(x-h//2)**2/float(2**sigma**2)) for x in range(h)])
+#     gauss_1d_h = gauss_1d_h
+#     gauss_2d = np.array([gauss_1d_w * s for s in gauss_1d_h])
+#     gauss_2d = gauss_2d / gauss_2d.sum()
+#     return gauss_2d
+
+class inputfn:
+    def __init__(noiselvl, map=False, clip=False):
+        # filter = get_gauss2d(5, 5, 2)
+        # filter = torch.from_numpy(filter)
+        # filter = filter.unsqueeze(0)
+        self.noiselvl = noiselvl
+        self.map = map
+        self.clip = clip
+
+    def __call__(x):
+        batch_size = x.size(0)
+        if type(self.noiselvl) == list:
+            sigma = torch.rand(batch_size, 1, 1, 1, device=x.device)
+            # sigma = torch.rand_like(images)
+            sigma = sigma * (self.noiselvl[1] - self.noiselvl[0]) + self.noiselvl[0]
+            # sigma = F.conv2d(sigma, filter, padding='same')
+            # sigma = torch.sqrt((self.noiselvl[1] - self.noiselvl[0])**2 * sigma) + self.noiselvl[0]
+        noise = torch.randn_like(x) * sigma / 255.
+        noisy = x + noise
+        if self.clip:
+            noisy = torch.clip(noisy, 0, 1)
+        if self.map:
+            map = sigma.expand_as(noisy) / 255.
+            noisy = torch.concatenate([noisy, map], axis=1)
+        return noisy
+    return inputfn
