@@ -186,7 +186,7 @@ class ImageDataset(Dataset):
 #     return gauss_2d
 
 class inputfn:
-    def __init__(noiselvl, map=False, clip=False):
+    def __init__(self, noiselvl, map=False, clip=False):
         # filter = get_gauss2d(5, 5, 2)
         # filter = torch.from_numpy(filter)
         # filter = filter.unsqueeze(0)
@@ -194,7 +194,7 @@ class inputfn:
         self.map = map
         self.clip = clip
 
-    def __call__(x):
+    def __call__(self, x):
         batch_size = x.size(0)
         if type(self.noiselvl) == list:
             sigma = torch.rand(batch_size, 1, 1, 1, device=x.device)
